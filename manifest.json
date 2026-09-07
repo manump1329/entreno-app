@@ -2,7 +2,7 @@
   "name": "Cuaderno de entreno — Manu",
   "short_name": "Entreno",
   "description": "Planificación y seguimiento de entrenamientos de fuerza y running",
-  "start_url": "/",
+  "start_url": ".",
   "display": "standalone",
   "orientation": "portrait",
   "background_color": "#14171A",

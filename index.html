@@ -95,7 +95,7 @@ section.active{display:block;}
 .ex .info .sets{color:var(--muted);font-size:12.5px;white-space:nowrap;}
 .ex .info .cue{color:var(--muted);font-size:12.5px;margin-top:2px;}
 .ex .info .muscle-tag{display:inline-block;margin-top:4px;font-size:10.5px;background:var(--surface-2);color:var(--muted);border-radius:3px;padding:1px 6px;}
-.ex-icon{width:40px;height:40px;border-radius:50%;background:var(--surface-2);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:20px;}
+.ex-icon{width:40px;height:40px;border-radius:50%;background:var(--surface-2);display:flex;align-items:center;justify-content:center;flex-shrink:0;overflow:hidden;}
 .ex-done-cb{width:22px;height:22px;accent-color:var(--lime);cursor:pointer;flex-shrink:0;margin-top:2px;}
 
 /* ─── WEIGHT LOG ─── */
@@ -382,12 +382,12 @@ select option{background:var(--surface);}
 // FIREBASE CONFIG  ← Rellena con tus datos
 // ════════════════════════════════════════════
 const FIREBASE_CONFIG = {
-  apiKey: "AIzaSyBBP3ZAYeXSR73wt6qt_EuvtV1Zj-ZSCSk",
-  authDomain: "entreno-manu.firebaseapp.com",
-  projectId: "entreno-manu",
-  storageBucket: "entreno-manu.firebasestorage.app",
-  messagingSenderId: "611689990234",
-  appId: "1:611689990234:web:a6e83f0941646f63ac7063"
+  apiKey: "TU_API_KEY",
+  authDomain: "TU_PROYECTO.firebaseapp.com",
+  projectId: "TU_PROYECTO_ID",
+  storageBucket: "TU_PROYECTO.appspot.com",
+  messagingSenderId: "TU_MESSAGING_SENDER_ID",
+  appId: "TU_APP_ID"
 };
 const FIREBASE_ENABLED = !FIREBASE_CONFIG.apiKey.startsWith("TU_");
 
@@ -745,9 +745,216 @@ document.getElementById('week-next').addEventListener('click', () => {
 // ════════════════════════════════════════════
 // PLAN RENDER
 // ════════════════════════════════════════════
-function iconEmoji(ex) {
-  const map = { prensa:'🦵', press_banca:'🏋️', press_militar:'💪', fondos_paralelas:'🤸', elev_laterales:'🔲', plancha_a:'🧘', pmr:'⬇️', remo_barra:'🚣', dominadas:'⬆️', curl_biceps:'💪', zancadas:'🚶', curl_femoral:'🦿', sentadilla:'🏋️', hip_thrust:'🍑', press_inclinado:'📐', remo_polea:'🚣', rueda_abd:'🌀', plancha_lateral:'🧘' };
-  return map[ex.id] || '●';
+function getLastWeight(exId) {
+  const entries = strengthLog.filter(e => e.exId === exId);
+  if (!entries.length) return '';
+  entries.sort((a,b) => new Date(b.date) - new Date(a.date));
+  return entries[0].weight || '';
+}
+function iconSvg(exId) {
+  const P = '#EDEEEA', L = '#D7F553', G = '#8B9299';
+  const r = `stroke-linecap="round" stroke-linejoin="round"`;
+  const b = `stroke="${P}" stroke-width="1.8" ${r}`;
+  const el = `stroke="${L}" stroke-width="2.5" ${r}`;
+  const s = d => `<svg viewBox="0 0 40 40" width="40" height="40" fill="none">${d}</svg>`;
+
+  const icons = {
+    sentadilla: s(`
+      <line x1="8" y1="12" x2="32" y2="12" ${el}/>
+      <circle cx="20" cy="7.5" r="2.5" stroke="${P}" stroke-width="1.8"/>
+      <line x1="20" y1="10" x2="20" y2="22" ${b}/>
+      <line x1="14" y1="12.5" x2="20" y2="19" ${b}/>
+      <line x1="26" y1="12.5" x2="20" y2="19" ${b}/>
+      <line x1="20" y1="22" x2="12" y2="30" ${b}/>
+      <line x1="20" y1="22" x2="28" y2="30" ${b}/>
+      <line x1="12" y1="30" x2="11" y2="36" ${b}/>
+      <line x1="28" y1="30" x2="29" y2="36" ${b}/>`),
+
+    press_banca: s(`
+      <rect x="5" y="24" width="30" height="3.5" rx="1.5" fill="${G}" opacity="0.5"/>
+      <circle cx="9" cy="20" r="2.5" stroke="${P}" stroke-width="1.8"/>
+      <line x1="9" y1="22.5" x2="31" y2="23.5" ${b}/>
+      <line x1="17" y1="22" x2="14" y2="15" ${b}/>
+      <line x1="17" y1="22" x2="21" y2="15" ${b}/>
+      <line x1="12" y1="14" x2="23" y2="14" ${el}/>
+      <line x1="31" y1="23.5" x2="34" y2="28" ${b}/>
+      <line x1="31" y1="23.5" x2="28" y2="28" ${b}/>`),
+
+    press_militar: s(`
+      <line x1="8" y1="13" x2="32" y2="13" ${el}/>
+      <circle cx="20" cy="8" r="2.5" stroke="${P}" stroke-width="1.8"/>
+      <line x1="20" y1="10.5" x2="20" y2="24" ${b}/>
+      <line x1="13.5" y1="13.5" x2="20" y2="20" ${b}/>
+      <line x1="26.5" y1="13.5" x2="20" y2="20" ${b}/>
+      <line x1="20" y1="24" x2="15" y2="33" ${b}/>
+      <line x1="20" y1="24" x2="25" y2="33" ${b}/>
+      <line x1="15" y1="33" x2="14" y2="37" ${b}/>
+      <line x1="25" y1="33" x2="26" y2="37" ${b}/>`),
+
+    dominadas: s(`
+      <line x1="6" y1="8" x2="34" y2="8" ${el}/>
+      <circle cx="20" cy="16" r="2.5" stroke="${P}" stroke-width="1.8"/>
+      <line x1="15" y1="8" x2="17" y2="13.5" ${b}/>
+      <line x1="25" y1="8" x2="23" y2="13.5" ${b}/>
+      <line x1="17" y1="13.5" x2="20" y2="21" ${b}/>
+      <line x1="23" y1="13.5" x2="20" y2="21" ${b}/>
+      <line x1="20" y1="18.5" x2="20" y2="29" ${b}/>
+      <line x1="20" y1="29" x2="15" y2="36" ${b}/>
+      <line x1="20" y1="29" x2="25" y2="36" ${b}/>`),
+
+    remo_barra: s(`
+      <circle cx="11" cy="11" r="2.5" stroke="${P}" stroke-width="1.8"/>
+      <line x1="11" y1="13.5" x2="28" y2="22" ${b}/>
+      <line x1="15" y1="16" x2="13" y2="24" ${b}/>
+      <line x1="15" y1="16" x2="21" y2="24" ${b}/>
+      <line x1="11" y1="24" x2="31" y2="27" ${el}/>
+      <line x1="28" y1="22" x2="32" y2="28" ${b}/>
+      <line x1="28" y1="22" x2="26" y2="30" ${b}/>`),
+
+    curl_biceps: s(`
+      <circle cx="20" cy="8" r="2.5" stroke="${P}" stroke-width="1.8"/>
+      <line x1="20" y1="10.5" x2="20" y2="23" ${b}/>
+      <line x1="20" y1="23" x2="14" y2="32" ${b}/>
+      <line x1="20" y1="23" x2="26" y2="32" ${b}/>
+      <line x1="14" y1="32" x2="13" y2="37" ${b}/>
+      <line x1="26" y1="32" x2="27" y2="37" ${b}/>
+      <line x1="20" y1="15" x2="12" y2="18" ${b}/>
+      <line x1="12" y1="18" x2="10" y2="26" ${b}/>
+      <rect x="7.5" y="23" width="5.5" height="3.5" rx="1" fill="${L}"/>`),
+
+    elev_laterales: s(`
+      <circle cx="20" cy="9" r="2.5" stroke="${P}" stroke-width="1.8"/>
+      <line x1="20" y1="11.5" x2="20" y2="24" ${b}/>
+      <line x1="20" y1="24" x2="15" y2="33" ${b}/>
+      <line x1="20" y1="24" x2="25" y2="33" ${b}/>
+      <line x1="15" y1="33" x2="14" y2="37" ${b}/>
+      <line x1="25" y1="33" x2="26" y2="37" ${b}/>
+      <line x1="20" y1="17" x2="9" y2="21" ${b}/>
+      <line x1="20" y1="17" x2="31" y2="21" ${b}/>
+      <rect x="6" y="19" width="4" height="3" rx="1" fill="${L}"/>
+      <rect x="30" y="19" width="4" height="3" rx="1" fill="${L}"/>`),
+
+    fondos_paralelas: s(`
+      <line x1="5" y1="14" x2="16" y2="14" ${el}/>
+      <line x1="24" y1="14" x2="35" y2="14" ${el}/>
+      <line x1="10" y1="14" x2="10" y2="34" stroke="${L}" stroke-width="1.8" ${r}/>
+      <line x1="30" y1="14" x2="30" y2="34" stroke="${L}" stroke-width="1.8" ${r}/>
+      <circle cx="20" cy="10" r="2.5" stroke="${P}" stroke-width="1.8"/>
+      <line x1="20" y1="12.5" x2="20" y2="25" ${b}/>
+      <line x1="10" y1="20" x2="20" y2="23" ${b}/>
+      <line x1="30" y1="20" x2="20" y2="23" ${b}/>
+      <line x1="20" y1="25" x2="16" y2="34" ${b}/>
+      <line x1="20" y1="25" x2="24" y2="34" ${b}/>`),
+
+    plancha_a: s(`
+      <line x1="5" y1="34" x2="36" y2="34" stroke="${G}" stroke-width="1.5" ${r}/>
+      <circle cx="9" cy="24" r="2.5" stroke="${P}" stroke-width="1.8"/>
+      <line x1="9" y1="26.5" x2="32" y2="25" ${b}/>
+      <line x1="9" y1="26.5" x2="8" y2="34" ${b}/>
+      <line x1="14" y1="26.2" x2="14" y2="34" ${b}/>
+      <line x1="32" y1="25" x2="31" y2="34" ${b}/>
+      <line x1="32" y1="25" x2="34" y2="34" ${b}/>`),
+
+    plancha_lateral: s(`
+      <line x1="5" y1="35" x2="36" y2="35" stroke="${G}" stroke-width="1.5" ${r}/>
+      <circle cx="11" cy="20" r="2.5" stroke="${P}" stroke-width="1.8"/>
+      <line x1="11" y1="22.5" x2="33" y2="28" ${b}/>
+      <line x1="8" y1="28" x2="33" y2="28" ${b}/>
+      <line x1="8" y1="28" x2="8" y2="35" ${b}/>
+      <line x1="33" y1="28" x2="33" y2="35" ${b}/>
+      <line x1="21" y1="25.5" x2="21" y2="13" ${b}/>`),
+
+    zancadas: s(`
+      <circle cx="17" cy="7" r="2.5" stroke="${P}" stroke-width="1.8"/>
+      <line x1="17" y1="9.5" x2="17" y2="20" ${b}/>
+      <line x1="17" y1="20" x2="9" y2="30" ${b}/>
+      <line x1="9" y1="30" x2="8" y2="36" ${b}/>
+      <line x1="17" y1="20" x2="23" y2="28" ${b}/>
+      <line x1="23" y1="28" x2="27" y2="36" ${b}/>
+      <line x1="17" y1="14" x2="25" y2="18" ${b}/>
+      <line x1="25" y1="18" x2="27" y2="27" ${b}/>`),
+
+    hip_thrust: s(`
+      <rect x="4" y="20" width="11" height="5" rx="1.5" fill="${G}" opacity="0.5"/>
+      <circle cx="10" cy="15" r="2.5" stroke="${P}" stroke-width="1.8"/>
+      <line x1="10" y1="17.5" x2="15" y2="21" ${b}/>
+      <line x1="15" y1="21" x2="22" y2="17" ${b}/>
+      <line x1="22" y1="17" x2="30" y2="21" ${b}/>
+      <line x1="30" y1="21" x2="32" y2="29" ${b}/>
+      <line x1="12" y1="13" x2="30" y2="13" ${el}/>`),
+
+    press_inclinado: s(`
+      <line x1="7" y1="35" x2="28" y2="20" stroke="${G}" stroke-width="2" ${r}/>
+      <circle cx="14" cy="30" r="2.5" stroke="${P}" stroke-width="1.8"/>
+      <line x1="14" y1="32.5" x2="26" y2="22" ${b}/>
+      <line x1="20" y1="26" x2="18" y2="19" ${b}/>
+      <line x1="20" y1="26" x2="24" y2="19" ${b}/>
+      <line x1="16" y1="18" x2="27" y2="18" ${el}/>
+      <line x1="14" y1="32.5" x2="12" y2="36" ${b}/>`),
+
+    pmr: s(`
+      <line x1="7" y1="32" x2="34" y2="32" stroke="${G}" stroke-width="1.5" ${r}/>
+      <circle cx="20" cy="15" r="2.5" stroke="${P}" stroke-width="1.8"/>
+      <line x1="20" y1="17.5" x2="20" y2="32" ${b}/>
+      <line x1="20" y1="23" x2="12" y2="19" ${b}/>
+      <line x1="12" y1="19" x2="10" y2="27" ${b}/>
+      <line x1="10" y1="25" x2="20" y2="27" ${el}/>
+      <line x1="20" y1="32" x2="16" y2="37" ${b}/>
+      <line x1="20" y1="32" x2="24" y2="37" ${b}/>`),
+
+    remo_polea: s(`
+      <line x1="34" y1="8" x2="34" y2="34" stroke="${G}" stroke-width="1.5" ${r}/>
+      <rect x="30" y="11" width="8" height="7" rx="2" fill="${L}" opacity="0.7"/>
+      <circle cx="10" cy="17" r="2.5" stroke="${P}" stroke-width="1.8"/>
+      <line x1="10" y1="19.5" x2="10" y2="28" ${b}/>
+      <line x1="10" y1="28" x2="7" y2="34" ${b}/>
+      <line x1="10" y1="28" x2="14" y2="34" ${b}/>
+      <line x1="10" y1="22" x2="28" y2="18" ${b}/>
+      <line x1="10" y1="25" x2="28" y2="22" ${b}/>`),
+
+    curl_femoral: s(`
+      <rect x="5" y="9" width="30" height="4.5" rx="2" fill="${G}" opacity="0.4"/>
+      <circle cx="9" cy="18" r="2.5" stroke="${P}" stroke-width="1.8"/>
+      <line x1="9" y1="20.5" x2="9" y2="13.5" ${b}/>
+      <line x1="9" y1="13.5" x2="28" y2="13" ${b}/>
+      <line x1="25" y1="13.2" x2="28" y2="22" ${b}/>
+      <line x1="28" y1="22" x2="23" y2="30" ${b}/>
+      <line x1="28" y1="22" x2="32" y2="28" ${b}/>`),
+
+    rueda_abd: s(`
+      <circle cx="28" cy="32" r="5" stroke="${L}" stroke-width="2.5"/>
+      <line x1="23" y1="32" x2="33" y2="32" stroke="${L}" stroke-width="1.5" ${r}/>
+      <circle cx="11" cy="13" r="2.5" stroke="${P}" stroke-width="1.8"/>
+      <line x1="11" y1="15.5" x2="11" y2="23" ${b}/>
+      <line x1="11" y1="23" x2="8" y2="28" ${b}/>
+      <line x1="11" y1="23" x2="15" y2="28" ${b}/>
+      <line x1="11" y1="20" x2="20" y2="27" ${b}/>
+      <line x1="20" y1="27" x2="22" y2="32" ${b}/>`),
+
+    prensa: s(`
+      <rect x="26" y="5" width="9" height="14" rx="2" fill="${L}" opacity="0.7"/>
+      <line x1="8" y1="32" x2="30" y2="32" stroke="${G}" stroke-width="2" ${r}/>
+      <circle cx="10" cy="16" r="2.5" stroke="${P}" stroke-width="1.8"/>
+      <line x1="10" y1="18.5" x2="10" y2="30" ${b}/>
+      <line x1="10" y1="22" x2="16" y2="20" ${b}/>
+      <line x1="16" y1="20" x2="22" y2="14" ${b}/>
+      <line x1="22" y1="14" x2="28" y2="10" ${b}/>
+      <line x1="10" y1="25" x2="18" y2="28" ${b}/>
+      <line x1="18" y1="28" x2="26" y2="24" ${b}/>
+      <line x1="26" y1="24" x2="29" y2="16" ${b}/>`),
+
+    running: s(`
+      <circle cx="22" cy="7" r="2.5" stroke="${P}" stroke-width="1.8"/>
+      <line x1="22" y1="9.5" x2="19" y2="20" ${b}/>
+      <line x1="19" y1="15" x2="12" y2="12" ${b}/>
+      <line x1="19" y1="15" x2="25" y2="20" ${b}/>
+      <line x1="19" y1="20" x2="13" y2="30" ${b}/>
+      <line x1="13" y1="30" x2="9" y2="36" ${b}/>
+      <line x1="19" y1="20" x2="26" y2="28" ${b}/>
+      <line x1="26" y1="28" x2="31" y2="24" ${b}/>`)
+  };
+
+  return icons[exId] || s(`<circle cx="20" cy="20" r="6" stroke="${G}" stroke-width="1.8"/>`);
 }
 
 function renderPlan() {
@@ -770,7 +977,7 @@ function renderPlan() {
         </div>
         <div class="day-body collapsed" id="body-${d.id}">
           <div class="ex">
-            <div class="ex-icon">🏃</div>
+            <div class="ex-icon">${iconSvg('running')}</div>
             <div class="info">
               <div class="name-row"><span class="name">${d.run.dist}</span><span class="sets">${d.run.pace}</span></div>
               <div class="cue">${d.run.note}</div>
@@ -790,11 +997,17 @@ function renderPlan() {
       const exRows = (d.exercises || []).map(e => `
         <div class="ex">
           <input type="checkbox" class="ex-done-cb" data-ex="${e.id}" data-day="${d.id}" ${state.exercises[e.id] ? 'checked' : ''}>
-          <div class="ex-icon">${iconEmoji(e)}</div>
+          <div class="ex-icon">${iconSvg(e.id)}</div>
           <div class="info">
             <div class="name-row"><span class="name">${e.name}</span><span class="sets">${e.sets}</span></div>
             <div class="cue">${e.cue}</div>
             <span class="muscle-tag">💪 ${e.muscle}</span>
+            <div class="wlog-row">
+              <label>Peso kg</label>
+              <input type="number" class="wlog-kg" data-ex="${e.id}" data-day="${d.id}" min="0" step="0.5" placeholder="0" value="${getLastWeight(e.id)}">
+              <label>Reps</label>
+              <input type="number" class="wlog-reps" data-ex="${e.id}" data-day="${d.id}" min="1" placeholder="—">
+            </div>
           </div>
         </div>`).join('');
       const allDone = d.exercises && d.exercises.every(e => state.exercises[e.id]);
@@ -841,6 +1054,29 @@ function attachPlanEvents() {
       checkins[dayId].exercises[exId] = cb.checked;
       viewingCheckins = checkins;
       await saveData('checkins', checkins);
+    });
+  });
+
+  // Inline weight log — save on blur when both kg and reps are filled
+  document.querySelectorAll('.wlog-kg, .wlog-reps').forEach(input => {
+    input.addEventListener('blur', async () => {
+      const exId = input.dataset.ex;
+      const row = input.closest('.wlog-row');
+      const kgEl = row.querySelector('.wlog-kg');
+      const repsEl = row.querySelector('.wlog-reps');
+      const weight = parseFloat(kgEl.value);
+      const reps = parseInt(repsEl.value);
+      if (!weight || !reps) return;
+      const exName = EXERCISE_NAMES.find(ex => ex.id === exId)?.name || exId;
+      const date = new Date().toISOString().slice(0, 10);
+      // Avoid duplicate for same exercise same day
+      const existing = strengthLog.findIndex(e => e.exId === exId && e.date === date);
+      if (existing >= 0) {
+        strengthLog[existing] = { date, exId, exName, weight, reps, sets: 3 };
+      } else {
+        strengthLog.push({ date, exId, exName, weight, reps, sets: 3 });
+      }
+      await saveData('strength-log', strengthLog);
     });
   });
 
@@ -1283,7 +1519,7 @@ init();
 // Register service worker
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/sw.js').catch(() => {});
+    navigator.serviceWorker.register('./sw.js').catch(() => {});
   });
 }
 </script>
