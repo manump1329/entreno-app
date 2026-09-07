@@ -1,12 +1,9 @@
 // Service Worker — Cuaderno de entreno
-const CACHE = 'entreno-v3';
+const CACHE = 'entreno-v4';
 const PRECACHE = [
   './',
   './index.html',
-  './manifest.json',
-  './icons/icon-192.png',
-  './icons/icon-512.png',
-  './icons/apple-touch-icon.png'
+  './manifest.json'
 ];
 
 self.addEventListener('install', e => {
@@ -24,14 +21,12 @@ self.addEventListener('activate', e => {
 });
 
 self.addEventListener('fetch', e => {
-  // Network-first for Firebase/external requests
   const url = new URL(e.request.url);
   if (url.hostname.includes('firebase') || url.hostname.includes('googleapis') ||
       url.hostname.includes('youtube') || url.hostname.includes('fonts')) {
     e.respondWith(fetch(e.request).catch(() => caches.match(e.request)));
     return;
   }
-  // Cache-first for local assets
   e.respondWith(
     caches.match(e.request).then(cached => {
       if (cached) return cached;
