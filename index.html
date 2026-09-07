@@ -99,10 +99,12 @@ section.active{display:block;}
 .ex-done-cb{width:22px;height:22px;accent-color:var(--lime);cursor:pointer;flex-shrink:0;margin-top:2px;}
 
 /* ─── WEIGHT LOG ─── */
-.wlog-row{display:flex;gap:8px;align-items:center;margin-bottom:8px;}
-.wlog-row label{font-size:12px;color:var(--muted);min-width:60px;}
-.wlog-row input{flex:1;background:var(--surface-2);border:1px solid var(--line);color:var(--text);border-radius:var(--radius);padding:6px 8px;font-size:14px;}
+.wlog-row{display:flex;gap:6px;align-items:center;margin-top:8px;padding:7px 9px;background:rgba(215,245,83,0.06);border:1px solid rgba(215,245,83,0.18);border-radius:var(--radius);}
+.wlog-row label{font-size:11px;color:var(--lime-dim);white-space:nowrap;font-weight:600;}
+.wlog-row input{flex:1;min-width:0;background:var(--surface);border:1px solid var(--line);color:var(--text);border-radius:var(--radius);padding:5px 7px;font-size:14px;font-family:'Inter';}
 .wlog-row input:focus{outline:none;border-color:var(--lime);}
+.wlog-saved{font-size:10px;color:var(--lime);margin-left:2px;opacity:0;transition:opacity .4s;}
+.wlog-saved.show{opacity:1;}
 
 /* ─── SESSION FOOTER ─── */
 .session-footer{margin-top:12px;border-top:1px solid var(--line);padding-top:12px;}
@@ -1007,6 +1009,7 @@ function renderPlan() {
               <input type="number" class="wlog-kg" data-ex="${e.id}" data-day="${d.id}" min="0" step="0.5" placeholder="0" value="${getLastWeight(e.id)}">
               <label>Reps</label>
               <input type="number" class="wlog-reps" data-ex="${e.id}" data-day="${d.id}" min="1" placeholder="—">
+              <span class="wlog-saved">✓</span>
             </div>
           </div>
         </div>`).join('');
@@ -1069,7 +1072,6 @@ function attachPlanEvents() {
       if (!weight || !reps) return;
       const exName = EXERCISE_NAMES.find(ex => ex.id === exId)?.name || exId;
       const date = new Date().toISOString().slice(0, 10);
-      // Avoid duplicate for same exercise same day
       const existing = strengthLog.findIndex(e => e.exId === exId && e.date === date);
       if (existing >= 0) {
         strengthLog[existing] = { date, exId, exName, weight, reps, sets: 3 };
@@ -1077,6 +1079,8 @@ function attachPlanEvents() {
         strengthLog.push({ date, exId, exName, weight, reps, sets: 3 });
       }
       await saveData('strength-log', strengthLog);
+      const indicator = row.querySelector('.wlog-saved');
+      if (indicator) { indicator.classList.add('show'); setTimeout(() => indicator.classList.remove('show'), 1500); }
     });
   });
 

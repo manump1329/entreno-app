@@ -1,5 +1,5 @@
 // Service Worker — Cuaderno de entreno
-const CACHE = 'entreno-v1';
+const CACHE = 'entreno-v3';
 const PRECACHE = [
   './',
   './index.html',
