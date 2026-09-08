@@ -29,12 +29,12 @@
 }
 *{box-sizing:border-box;margin:0;padding:0;}
 html,body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;font-size:15px;line-height:1.5;}
-body{padding-bottom:80px;}
+body{padding-bottom:max(80px, calc(env(safe-area-inset-bottom) + 60px));}
 h1,h2,h3{font-family:'Oswald',sans-serif;font-weight:600;letter-spacing:0.01em;}
-.wrap{max-width:640px;margin:0 auto;padding:0 16px;}
+.wrap{max-width:640px;margin:0 auto;padding:0 max(16px, env(safe-area-inset-left));}
 
 /* ─── HEADER ─── */
-header.top{border-bottom:1px solid var(--line);padding:20px 16px 0;background:linear-gradient(180deg,#181C1F 0%,var(--bg) 100%);}
+header.top{border-bottom:1px solid var(--line);padding:max(20px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right)) 0 max(16px, env(safe-area-inset-left));background:linear-gradient(180deg,#181C1F 0%,var(--bg) 100%);}
 header.top .row{display:flex;align-items:center;justify-content:space-between;max-width:640px;margin:0 auto;}
 header.top h1{font-size:22px;color:var(--lime);}
 #auth-btn{background:none;border:1px solid var(--line);color:var(--muted);font-family:'Inter',sans-serif;font-size:12px;padding:5px 10px;border-radius:20px;cursor:pointer;display:flex;align-items:center;gap:6px;}
@@ -441,7 +441,7 @@ const WEEK_PLAN = [
 // ════════════════════════════════════════════
 const EXERCISE_LIBRARY = [
   {id:"prensa", name:"Prensa de piernas", muscle:"Cuádriceps / Glúteo", secondary:"Isquiotibiales, Gemelos",
-   yt:"dMFGs-oBdFY", cue:"Pies a la anchura de hombros. Baja controlado hasta 90°. No bloquees rodillas arriba.",
+   yt:"P-yaD24bUE8", cue:"Pies a la anchura de hombros. Baja controlado hasta 90°. No bloquees rodillas arriba.",
    primary_muscles:["quad","glute"], secondary_muscles:["hamstring","calf"]},
   {id:"press_banca", name:"Press banca (mancuernas)", muscle:"Pecho / Tríceps", secondary:"Hombro anterior, Core",
    yt:"VmB1G1K7v94", cue:"Escápulas fijas en el banco. Mancuernas a la altura del pecho. Empuja hacia arriba y ligeramente hacia dentro.",
@@ -453,13 +453,13 @@ const EXERCISE_LIBRARY = [
    yt:"2z8JmcrW-As", cue:"Baja hasta 90° de codo. Sube sin balancear el cuerpo. Usa máquina asistida al principio.",
    primary_muscles:["chest","tricep"], secondary_muscles:["shoulder"]},
   {id:"elev_laterales", name:"Elevaciones laterales", muscle:"Deltoide lateral", secondary:"Trapecio superior",
-   yt:"kDqklk6xl7Y", cue:"Peso muy ligero. Codos ligeramente flexionados. Sube hasta la altura del hombro con control.",
+   yt:"PzsMitRdI_8", cue:"Peso muy ligero. Codos ligeramente flexionados. Sube hasta la altura del hombro con control.",
    primary_muscles:["shoulder"], secondary_muscles:["trap"]},
   {id:"plancha_a", name:"Plancha abdominal", muscle:"Core (transverso / recto)", secondary:"Glúteo, Hombros",
    yt:"yeKv5oX_6GY", cue:"Cadera alineada con los hombros. No dejes caer la cadera ni subas el culo. Respira.",
    primary_muscles:["core"], secondary_muscles:["glute","shoulder"]},
   {id:"pmr", name:"Peso muerto rumano", muscle:"Femoral / Glúteo", secondary:"Espalda baja, Core",
-   yt:"2SHsk9374oo", cue:"Espalda recta y neutral. La barra roza las piernas al bajar. Para cuando notes el tirón en isquios.",
+   yt:"qXrTDQG1oUQ", cue:"Espalda recta y neutral. La barra roza las piernas al bajar. Para cuando notes el tirón en isquios.",
    primary_muscles:["hamstring","glute"], secondary_muscles:["lower_back","core"]},
   {id:"remo_barra", name:"Remo con barra", muscle:"Espalda media (romboides / dorsal)", secondary:"Bíceps, Core",
    yt:"kBWAon7ItDw", cue:"Tronco fijo ~45°. Tira hacia el abdomen. Aprieta la espalda al final del recorrido.",
@@ -477,7 +477,7 @@ const EXERCISE_LIBRARY = [
    yt:"1Tq3QdYUuHs", cue:"Movimiento lento. Aprieta 1 segundo arriba. Almohadilla por encima del tobillo.",
    primary_muscles:["hamstring"], secondary_muscles:["calf"]},
   {id:"sentadilla", name:"Sentadilla con barra", muscle:"Cuádriceps / Glúteo", secondary:"Femoral, Core, Espalda",
-   yt:"ultWZbUMPL8", cue:"Pecho arriba, rodillas siguen la punta del pie. Baja hasta la paralela. Empuja el suelo al subir.",
+   yt:"p5dCqF7wWUw", cue:"Pecho arriba, rodillas siguen la punta del pie. Baja hasta la paralela. Empuja el suelo al subir.",
    primary_muscles:["quad","glute"], secondary_muscles:["hamstring","core","lower_back"]},
   {id:"hip_thrust", name:"Hip thrust", muscle:"Glúteo", secondary:"Femoral, Core",
    yt:"xDmFkJxPzeM", cue:"Escápulas en el banco. Aprieta el glúteo arriba. Evita arquear lumbar. Baja controlado.",
@@ -753,6 +753,12 @@ function getLastWeight(exId) {
   entries.sort((a,b) => new Date(b.date) - new Date(a.date));
   return entries[0].weight || '';
 }
+function getLastReps(exId) {
+  const entries = strengthLog.filter(e => e.exId === exId);
+  if (!entries.length) return '';
+  entries.sort((a,b) => new Date(b.date) - new Date(a.date));
+  return entries[0].reps || '';
+}
 function iconSvg(exId) {
   const P = '#EDEEEA', L = '#D7F553', G = '#8B9299';
   const r = `stroke-linecap="round" stroke-linejoin="round"`;
@@ -1008,7 +1014,7 @@ function renderPlan() {
               <label>Peso kg</label>
               <input type="number" class="wlog-kg" data-ex="${e.id}" data-day="${d.id}" min="0" step="0.5" placeholder="0" value="${getLastWeight(e.id)}">
               <label>Reps</label>
-              <input type="number" class="wlog-reps" data-ex="${e.id}" data-day="${d.id}" min="1" placeholder="—">
+              <input type="number" class="wlog-reps" data-ex="${e.id}" data-day="${d.id}" min="1" placeholder="—" value="${getLastReps(e.id)}">
               <span class="wlog-saved">✓</span>
             </div>
           </div>
@@ -1067,14 +1073,16 @@ function attachPlanEvents() {
       const row = input.closest('.wlog-row');
       const kgEl = row.querySelector('.wlog-kg');
       const repsEl = row.querySelector('.wlog-reps');
-      const weight = parseFloat(kgEl.value);
-      const reps = parseInt(repsEl.value);
-      if (!weight || !reps) return;
+      const weight = kgEl.value !== '' ? parseFloat(kgEl.value) : null;
+      const reps = repsEl.value !== '' ? parseInt(repsEl.value) : null;
+      if (weight === null && reps === null) return;
       const exName = EXERCISE_NAMES.find(ex => ex.id === exId)?.name || exId;
       const date = new Date().toISOString().slice(0, 10);
       const existing = strengthLog.findIndex(e => e.exId === exId && e.date === date);
       if (existing >= 0) {
-        strengthLog[existing] = { date, exId, exName, weight, reps, sets: 3 };
+        if (weight !== null) strengthLog[existing].weight = weight;
+        if (reps !== null) strengthLog[existing].reps = reps;
+        strengthLog[existing].exName = exName;
       } else {
         strengthLog.push({ date, exId, exName, weight, reps, sets: 3 });
       }
