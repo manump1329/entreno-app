@@ -1,5 +1,5 @@
 // Service Worker — Cuaderno de entreno
-const CACHE = 'entreno-v9';
+const CACHE = 'entreno-v10';
 const PRECACHE = ['./', './index.html', './manifest.json'];
 
 // Iconos incrustados como base64 (no necesita carpeta icons/ en GitHub)
