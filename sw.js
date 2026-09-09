@@ -1,5 +1,5 @@
 // Service Worker — Cuaderno de entreno
-const CACHE = 'entreno-v11';
+const CACHE = 'entreno-v12';
 const PRECACHE = ['./', './index.html', './manifest.json', './apple-touch-icon.png'];
 
 // Iconos incrustados como base64 (no necesita carpeta icons/ en GitHub)

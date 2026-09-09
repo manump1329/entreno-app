@@ -129,6 +129,9 @@ th,td{text-align:left;padding:7px 8px;border-bottom:1px solid var(--line);}
 th{color:var(--muted);font-weight:500;font-size:11px;text-transform:uppercase;}
 td{color:var(--text);}
 tr:last-child td{border-bottom:none;}
+.btn-del{background:none;border:none;color:var(--muted);font-size:16px;cursor:pointer;padding:0 4px;line-height:1;border-radius:4px;transition:color .15s,background .15s;}
+.btn-del:hover{color:#ff5555;background:rgba(255,85,85,0.12);}
+td.del-col{text-align:center;width:32px;padding:4px;}
 
 /* ─── FORM ─── */
 .form-row{display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap;}
@@ -1237,9 +1240,29 @@ function renderExHistory() {
     ? strengthLog.filter(e => e.exId === exId).sort((a,b) => new Date(b.date) - new Date(a.date))
     : strengthLog.slice().sort((a,b) => new Date(b.date) - new Date(a.date)).slice(0, 20);
   if (entries.length === 0) { div.innerHTML = '<div class="empty">Sin registros todavía.</div>'; return; }
-  div.innerHTML = `<table><thead><tr><th>Fecha</th><th>Ejercicio</th><th>Peso</th><th>Reps</th><th>Series</th></tr></thead><tbody>
-    ${entries.map((e,i) => `<tr><td>${e.date}</td><td style="font-size:12px;">${e.exName}</td><td>${e.weight} kg</td><td>${e.reps}</td><td>${e.sets}</td></tr>`).join('')}
+  div.innerHTML = `<table><thead><tr><th>Fecha</th><th>Ejercicio</th><th>Peso</th><th>Reps</th><th>Series</th><th></th></tr></thead><tbody>
+    ${entries.map(e => `<tr>
+      <td>${e.date}</td>
+      <td style="font-size:12px;">${e.exName}</td>
+      <td>${e.weight != null ? e.weight + ' kg' : '—'}</td>
+      <td>${e.reps != null ? e.reps : '—'}</td>
+      <td>${e.sets}</td>
+      <td class="del-col"><button class="btn-del" data-date="${e.date}" data-exid="${e.exId}" title="Eliminar registro">×</button></td>
+    </tr>`).join('')}
   </tbody></table>`;
+
+  div.querySelectorAll('.btn-del').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const date = btn.dataset.date;
+      const exid = btn.dataset.exid;
+      const idx = strengthLog.findIndex(e => e.date === date && e.exId === exid);
+      if (idx === -1) return;
+      strengthLog.splice(idx, 1);
+      await saveData('strength-log', strengthLog);
+      renderExHistory();
+      renderStrengthChart();
+    });
+  });
 }
 
 // ════════════════════════════════════════════
@@ -1274,11 +1297,26 @@ document.getElementById('run-save').addEventListener('click', async () => {
 function renderRunning() {
   const sorted = runningLog.slice().sort((a,b) => new Date(a.date) - new Date(b.date));
   const hist = document.getElementById('run-history');
-  hist.innerHTML = sorted.length === 0
-    ? '<div class="empty">Sin carreras registradas todavía.</div>'
-    : `<table><thead><tr><th>Fecha</th><th>Km</th><th>Ritmo</th><th>FC</th><th>VO2</th><th>RPE</th></tr></thead><tbody>
-        ${sorted.slice().reverse().map(r => `<tr><td>${r.date}</td><td>${r.dist}</td><td>${r.pace}</td><td>${r.hr||'—'}</td><td>${r.vo2||'—'}</td><td>${r.rpe||'—'}</td></tr>`).join('')}
-      </tbody></table>`;
+  if (sorted.length === 0) {
+    hist.innerHTML = '<div class="empty">Sin carreras registradas todavía.</div>';
+  } else {
+    const rows = sorted.slice().reverse();
+    hist.innerHTML = `<table><thead><tr><th>Fecha</th><th>Km</th><th>Ritmo</th><th>FC</th><th>VO2</th><th>RPE</th><th></th></tr></thead><tbody>
+      ${rows.map((r, i) => `<tr>
+        <td>${r.date}</td><td>${r.dist}</td><td>${r.pace}</td>
+        <td>${r.hr||'—'}</td><td>${r.vo2||'—'}</td><td>${r.rpe||'—'}</td>
+        <td class="del-col"><button class="btn-del" data-ridx="${sorted.length - 1 - i}" title="Eliminar">×</button></td>
+      </tr>`).join('')}
+    </tbody></table>`;
+    hist.querySelectorAll('.btn-del').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const idx = parseInt(btn.dataset.ridx);
+        runningLog.splice(idx, 1);
+        await saveData('running-log', runningLog);
+        renderRunning();
+      });
+    });
+  }
   const ctx = document.getElementById('run-chart');
   if (runChart) { runChart.destroy(); runChart = null; }
   if (sorted.length === 0) return;
